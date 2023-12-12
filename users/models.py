@@ -1,16 +1,13 @@
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.management.commands import createsuperuser
-from django.core.management import CommandError
-from django.utils.crypto import get_random_string
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 ROLES = (
-    ("Admin", "Admin"),
-    ("Student", "Student"),
-    ("Librarian", "Librarian")
+    ("Администратор", "Admin"),
+    ("Студент", "Student"),
+    ("Библиотекарь", "Librarian")
 )
 
 
@@ -24,16 +21,29 @@ class Group(models.Model):
         return f"{self.title} group"
 
 
+def check_email_exist(email: str):
+    if not email:
+        return ValueError("Email is required field")
+
+
+def check_role_exist(role: str):
+    if role not in dict(ROLES).values():
+        return ValueError("Invalid user role")
+
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("Email is required field")
+        # if not email:
+        #     raise ValueError("Email is required field")
+        check_email_exist(email)
 
         email = self.normalize_email(email)
         role = extra_fields.get("role", "Student")
 
-        if role not in dict(ROLES).values():
-            raise ValueError("Invalid user status")
+        # if role not in dict(ROLES).values():
+        #     raise ValueError("Invalid user status")
+
+        check_role_exist(role)
 
         user = self.model(email=email, **extra_fields)
         user.role = role
