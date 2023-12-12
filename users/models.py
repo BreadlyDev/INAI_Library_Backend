@@ -72,7 +72,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15, null=True)
     role = models.CharField(max_length=150, choices=ROLES, default=ROLES[1][1])
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)
+    group = models.OneToOneField(Group, on_delete=models.CASCADE, null=True, blank=True)
 
     username = None
     date_joined = None
@@ -100,8 +100,6 @@ class User(AbstractUser):
         if self.phone:
             validate_phone(str(self.phone))
 
-        # if not self.password:
-        #     self.set_password(self.password)
         set_password_exist(self=self, password=self.password)
 
         super().save(*args, **kwargs)
