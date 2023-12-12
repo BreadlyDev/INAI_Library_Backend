@@ -11,14 +11,14 @@ class GroupSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=150, write_only=True)
     role = serializers.ReadOnlyField()
+    # group = serializers.PrimaryKeyRelatedField()
 
     class Meta:
         model = User
         fields = "__all__"
-
-    def create(self, **validated_data):
-        user = User.objects.create_user(**validated_data)
-        return user
+    # def create(self, **validated_data):
+    #     user = User.objects.create_user(**validated_data)
+    #     return user
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

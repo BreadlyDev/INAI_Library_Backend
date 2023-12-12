@@ -1,13 +1,12 @@
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 ROLES = (
-    ("Администратор", "Admin"),
-    ("Студент", "Student"),
-    ("Библиотекарь", "Librarian")
+    ("Admin", "Admin"),
+    ("Student", "Student"),
+    ("Librarian", "Librarian")
 )
 
 
@@ -23,25 +22,31 @@ class Group(models.Model):
 
 def check_email_exist(email: str):
     if not email:
-        return ValueError("Email is required field")
+        raise ValueError("Email is required field")
 
 
 def check_role_exist(role: str):
     if role not in dict(ROLES).values():
-        return ValueError("Invalid user role")
+        raise ValueError("Invalid user role")
+
+
+def set_password_exist(self, password):
+    if not password:
+        self.set_password(password)
+
+
+def validate_phone(phone: str):
+    if not phone.isdigit():
+        raise ValueError("Invalid phone number")
 
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
-        # if not email:
-        #     raise ValueError("Email is required field")
+
         check_email_exist(email)
 
         email = self.normalize_email(email)
         role = extra_fields.get("role", "Student")
-
-        # if role not in dict(ROLES).values():
-        #     raise ValueError("Invalid user status")
 
         check_role_exist(role)
 
@@ -61,11 +66,11 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    password = models.CharField(max_length=150)
-    firstname = models.CharField(max_length=150)
-    lastname = models.CharField(max_length=150)
+    password = models.CharField(max_length=128)
+    firstname = models.CharField(max_length=150, unique=True)
+    lastname = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=150, null=True)
+    phone = models.CharField(max_length=15, null=True)
     role = models.CharField(max_length=150, choices=ROLES, default=ROLES[1][1])
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)
 
@@ -89,7 +94,14 @@ class User(AbstractUser):
         return f"{self.role} {self.firstname} {self.lastname}"
 
     def save(self, *args, **kwargs):
-        if self.role != ROLES[1][1]:
+        if self.role not in ROLES[1]:
             self.group = None
-        self.password = make_password(self.password)
-        super().save()
+
+        if self.phone:
+            validate_phone(str(self.phone))
+
+        # if not self.password:
+        #     self.set_password(self.password)
+        set_password_exist(self=self, password=self.password)
+
+        super().save(*args, **kwargs)
