@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserSerializer, LoginSerializer, GroupSerializer
-from .services import create_user, enter_system
+from .services import create_user, enter_system, quit_system
 
 
 def base_post_view(request, function, http_status: status):
@@ -21,3 +21,8 @@ def register(request):
 @api_view(["POST"])
 def login(request):
     return base_post_view(request, enter_system, status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def logout(request):
+    return base_post_view(request, quit_system, status.HTTP_200_OK)
