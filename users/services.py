@@ -1,15 +1,7 @@
-import time
-from django.forms import model_to_dict
-from django.core.serializers import serialize
-from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User
-from .serializers import UserSerializer, GroupSerializer
+from .models import User, Group
+from .serializers import UserSerializer, GroupSerializer, LoginSerializer
 
-
-# def create_group(serializer: LoginSerializer):
-#
-#     serializer.
 
 def get_all_objects(model):
     return model.objects.all()
@@ -18,15 +10,6 @@ def get_all_objects(model):
 def get_objects_by_field(model, field: str, value: any):
     field_kw: dict = {field: value}
     return model.objects.filter(**field_kw)
-
-
-# def get_all_users() -> User:
-#     return User.objects.all()
-
-
-# def get_user_by_field(field: str, value: str | int) -> User | None:
-#     field_kw: dict = {field: value}
-#     return User.objects.filter(**field_kw).first()
 
 
 def check_list_len(_list: list):
@@ -45,11 +28,6 @@ def get_request_field_values(data: dict, fields: list[str]) -> list:
 
     check_list_len(data_list)
     return data_list
-
-
-# def check_field_exist(field):
-#     if not field:
-#         return {"message": f"{field} doesn't exist"}
 
 
 def check_user_and_password(user: User, password) -> dict | None:
@@ -101,7 +79,7 @@ def enter_system(request) -> dict:
         data = request.data
         email, password = get_request_field_values(data, ["email", "password"])
         user = get_objects_by_field(model=User, field="email", value=email).first()
-        user_data = model_to_dict(user)
+        user_data = LoginSerializer(user)
 
         invalid = check_user_and_password(user, password)
 
@@ -113,7 +91,7 @@ def enter_system(request) -> dict:
         return {
             "message": "User logged in successfully",
             **tokens,
-            **user_data
+            **user_data.data
         }
     except Exception as e:
         print(e)
@@ -144,8 +122,8 @@ def get_object_list_or_object(queryset):
 
 def get_all_users(request):
     try:
-        users = get_objects_by_field(model=User, field="role", value="Student")
-        user_list = UserSerializer(users, many=True) if not isinstance(users, User) else UserSerializer(users)
+        users = get_objects_by_field(model=User, field="is_superuser", value=False)
+        user_list = UserSerializer(users, many=True)
         return user_list.data
     except Exception as e:
         print(e)
@@ -162,6 +140,46 @@ def add_group(request):
             **serializer.validated_data,
         }
         return response
+    except Exception as e:
+        print(e)
+
+
+def get_group_by_id(request, field):
+    try:
+        data = request.data
+        group = get_objects_by_field(model=Group, field="pk", value=field).first()
+        group_data = GroupSerializer(group)
+        return group_data.data
+    except Exception as e:
+        print(e)
+
+
+def update_group(request, field):
+    try:
+        data = request.data
+        group = get_objects_by_field(model=Group, field="pk", value=field).first()
+
+        if not group:
+            return {"message": "Group not found"}
+
+        serializer = GroupSerializer(group, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return serializer.data
+    except Exception as e:
+        print(e)
+
+
+def delete_group(request, field):
+    try:
+        group = get_objects_by_field(model=Group, field="pk", value=field).first()
+
+        if not group:
+            return {"message": "Group not found"}
+
+        group.delete()
+        return {"message": "Group was successfully deleted"}
     except Exception as e:
         print(e)
 
