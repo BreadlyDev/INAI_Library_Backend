@@ -29,7 +29,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["group"] = instance.group.title if instance.group.title else None
+        group = instance.group
+        representation["group"] = group.title if group and group.title else None
+        return representation
 
 
 class LoginSerializer(serializers.ModelSerializer):

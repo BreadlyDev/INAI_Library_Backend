@@ -1,21 +1,32 @@
+import time
 from django.forms import model_to_dict
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from .models import User, Group
-from .serializers import UserSerializer, LoginSerializer, GroupSerializer
+from django.core.serializers import serialize
+from django.http import JsonResponse
+from rest_framework_simplejwt.tokens import RefreshToken
+from .models import User
+from .serializers import UserSerializer, GroupSerializer
 
 
 # def create_group(serializer: LoginSerializer):
 #
 #     serializer.
 
+def get_all_objects(model):
+    return model.objects.all()
 
-def get_all_users() -> User:
-    return User.objects.all()
 
-
-def get_user_by_field(field: str, value: str | int) -> User | None:
+def get_objects_by_field(model, field: str, value: any):
     field_kw: dict = {field: value}
-    return User.objects.filter(**field_kw).first()
+    return model.objects.filter(**field_kw)
+
+
+# def get_all_users() -> User:
+#     return User.objects.all()
+
+
+# def get_user_by_field(field: str, value: str | int) -> User | None:
+#     field_kw: dict = {field: value}
+#     return User.objects.filter(**field_kw).first()
 
 
 def check_list_len(_list: list):
@@ -89,7 +100,7 @@ def enter_system(request) -> dict:
     try:
         data = request.data
         email, password = get_request_field_values(data, ["email", "password"])
-        user = get_user_by_field(field="email", value=email)
+        user = get_objects_by_field(model=User, field="email", value=email).first()
         user_data = model_to_dict(user)
 
         invalid = check_user_and_password(user, password)
@@ -125,3 +136,40 @@ def quit_system(request):
         }
     except Exception as e:
         print(e)
+
+
+def get_object_list_or_object(queryset):
+    ...
+
+
+def get_all_users(request):
+    try:
+        users = get_objects_by_field(model=User, field="role", value="Student")
+        user_list = UserSerializer(users, many=True) if not isinstance(users, User) else UserSerializer(users)
+        return user_list.data
+    except Exception as e:
+        print(e)
+
+
+def add_group(request):
+    try:
+        serializer = GroupSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        response = {
+            "message": "Group registered successfully",
+            **serializer.validated_data,
+        }
+        return response
+    except Exception as e:
+        print(e)
+
+# def get_all_users(request):
+#     try:
+#         users = get_all_objects(model=User)
+#         user_list = UserSerializer(users, many=True)
+#         return user_list.data
+#     except Exception as e:
+#         print(e)
+
