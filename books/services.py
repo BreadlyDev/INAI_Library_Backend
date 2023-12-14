@@ -1,43 +1,53 @@
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404, get_list_or_404
+
 from .models import Book, Subcategory, Category
 from .serializers import BookSerializer
-from users.services import get_all_objects, get_objects_by_field, get_request_field_values
-from services.services import serialize_data, deserialize_data
+from services.services import deserialize_data
 
 
-def create_book(request) -> dict | None:
+def create__book(request) -> dict | None:
     result = deserialize_data(request, serialized_class=BookSerializer)
     return result
 
 
-def update_book(request, pk) -> dict | None:
-    book = get_objects_by_field(model=Book, field="pk", value=pk).first()
+def update__book(request, pk) -> dict | None:
+    book = get_object_or_404(Book, pk=pk)
     result = deserialize_data(request, model=book, serialized_class=BookSerializer, partial=True)
     return result
 
 
-def delete_book(request, pk) -> dict | None:
-    book = get_objects_by_field(model=Book, field="pk", value=pk).first()
-    if not book:
-        return {"message": "Book doesn't exist"}
+def delete__book(request, pk) -> dict | None:
+    book = get_object_or_404(Book, pk=pk)
     book.delete()
     return {"message": "Book was successfully deleted"}
 
 
-def get_book_by_id(request, pk) -> dict | None:
-    book = get_objects_by_field(model=Book, field="pk", value=pk)
-    result = serialize_data(model=book, serialized_class=BookSerializer)
-    if not book:
-        return {"message": "Book doesn't exist"}
-    return result
+def get__book(request, pk) -> dict | None:
+    book = get_object_or_404(Book, pk=pk)
+    serializer = BookSerializer(book)
+    return serializer.data
 
 
-def get_all_books(request) -> dict | None:
-    book = get_all_objects(Book)
-    result = serialize_data(model=book, serialized_class=BookSerializer, many=True)
-    return result
+def get__all__books(request, *args, **kwargs) -> dict | None:
+    book = get_list_or_404(Book, *args, **kwargs)
+    category = request.GET.get("category")
+    if category:
+        book = Book.objects.filter(category__title=category.capitalize())
+    serializer = BookSerializer(book, many=True)
+    return serializer.data
 
 
 def get_books_by_cat(request, category) -> dict | None:
-    book = get_objects_by_field(model=Book, field="category", value=category)
-    result = serialize_data(model=book, serialized_class=BookSerializer, many=True)
-    return result
+    book = get_list_or_404(Book, category=category)
+    serializer = BookSerializer(book, many=True)
+    return serializer.data
+
+
+def get_e_book_file(request, pk):
+    file = get_object_or_404(Book, pk=pk)
+    path = file.e_book.path
+    response = FileResponse(open(path, 'rb'))
+    response["Content-Disposition"] = f"attachment; filename = {file.e_book.name}"
+    response["Content-Type"] = "application/msword"
+    return response

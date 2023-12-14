@@ -9,10 +9,14 @@ LANGUAGES = (
 )
 
 
-def validate_price(phone):
-    if phone.isdigit():
-        return True
-    return False
+def validate_price(price):
+    if not str(price).isdigit():
+        raise ValueError("Invalid price value")
+
+
+def validate_edition_year(year):
+    if not str(year).isdigit():
+        raise ValueError("Invalid edition year")
 
 
 class Category(models.Model):
@@ -47,18 +51,26 @@ class Book(models.Model):
     inventory_number = models.CharField(max_length=150)
     language = models.CharField(choices=LANGUAGES, max_length=150)
     edition_year = models.CharField(max_length=4)
-    purchase_price = models.CharField(max_length=10, validators=[validate_price])
+    purchase_price = models.CharField(max_length=10)
     purchase_time = models.DateField()
     quantity = models.IntegerField()
     isPossibleToOrder = models.BooleanField(default=True)
     rating = models.FloatField(default=0)
     orders = models.IntegerField(default=0)
-    reviews = models.IntegerField(default=0)
+    reviews_quantity = models.IntegerField(default=0)
+    absolute_rating = models.IntegerField(default=0)
     created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["reviews"]
+        ordering = ["reviews_quantity"]
         db_table = "books"
 
     def __str__(self):
-        return f"{self.title} book with id = {self.id}"
+        return f"{self.title} book with id = {self.pk}"
+
+    def save(self, *args, **kwargs):
+        if self.purchase_price:
+            validate_price(self.purchase_price)
+        if self.edition_year:
+            validate_edition_year(self.edition_year)
+        super().save(*args, **kwargs)

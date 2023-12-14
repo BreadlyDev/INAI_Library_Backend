@@ -1,6 +1,14 @@
 from rest_framework.response import Response
 
 
+def base_view(request, function, *args, **kwargs):
+    try:
+        object_data = function(request, *args, **kwargs)
+        return Response(object_data)
+    except Exception as e:
+        return Response({"Error happened": e})
+
+
 def get_all_objects(model):
     return model.objects.all()
 
@@ -8,20 +16,6 @@ def get_all_objects(model):
 def get_objects_by_field(model, field: str, value: any):
     field_kw: dict = {field: value}
     return model.objects.filter(**field_kw)
-
-
-def get_request_field_values(data: dict, fields: list[str]) -> list | dict:
-    values: list = []
-    for field in fields:
-        if not data.get(field):
-            continue
-        values.append(data.get(field))
-    return values
-
-
-def serialize_data(model, serialized_class, many=False):
-    serializer = serialized_class(instance=model, many=many)
-    return serializer.data
 
 
 def deserialize_data(request, serialized_class, raise_exception=True, model=None,

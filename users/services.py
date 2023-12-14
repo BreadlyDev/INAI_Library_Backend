@@ -1,9 +1,8 @@
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User, Group
 from .serializers import UserSerializer, GroupSerializer, LoginSerializer
-from services.services import (get_all_objects, get_objects_by_field,
-                               get_request_field_values, serialize_data, deserialize_data,
-                               try_except_decorator)
+from services.services import (get_all_objects, deserialize_data, try_except_decorator)
 
 
 def check_user_and_password(user: User, password) -> dict | None:
@@ -19,68 +18,75 @@ def check_refresh_token(refresh_token: RefreshToken) -> dict | None:
 
 
 @try_except_decorator
-def create_token(user: User) -> dict | None:
+def create_token(user) -> dict | None:
     refresh = RefreshToken.for_user(user)
     access = refresh.access_token
+
     response = {
         "access_token": str(access),
         "refresh_token": str(refresh)
     }
+
     return response
 
 
 @try_except_decorator
-def create_user(request) -> dict | None:
+def create_user(request, *args, **kwargs) -> dict | None:
     result, user = deserialize_data(request, UserSerializer, return_model=True)
     result["group"] = result["group"].title
     tokens = create_token(user)
+
     response = {
         "message": "User registered successfully",
         **result,
         **tokens
     }
+
     return response
 
 
 @try_except_decorator
-def enter_system(request) -> dict | None:
-    data = request.data
-    email, password = get_request_field_values(data, ["email", "password"])
-    user = get_objects_by_field(model=User, field="email", value=email).first()
-    result = serialize_data(user, LoginSerializer)
+def enter_system(request, *args, **kwargs) -> dict | None:
+    password = request.data["password"]
+    user = get_object_or_404(User, email=request.data["email"])
+    serializer = LoginSerializer(user)
     invalid = check_user_and_password(user, password)
+
     if invalid:
         return invalid
+
     tokens = create_token(user)
     response = {
         "message": "User logged in successfully",
         **tokens,
-        **result
+        **serializer.data
     }
+
     return response
 
 
 @try_except_decorator
-def quit_system(request) -> dict | None:
-    data = request.data
-    refresh_token = get_request_field_values(data, ["refresh_token"])
-    invalid = check_refresh_token(*refresh_token)
+def quit_system(request, *args, **kwargs) -> dict | None:
+    refresh_token = request.data["refresh_token"]
+    invalid = check_refresh_token(refresh_token)
+
     if invalid:
         return invalid
-    RefreshToken(*refresh_token).blacklist()
-    response = {"message": "User logged out successfully "}
+
+    RefreshToken(refresh_token).blacklist()
+    response = {"message": "User logged out successfully"}
     return response
 
 
 @try_except_decorator
-def get_all_users(request) -> dict | None:
-    users = get_objects_by_field(model=User, field="is_superuser", value=False)
-    result = serialize_data(model=users, serialized_class=UserSerializer, many=True)
-    return result
+def get_all_users(request, *args, **kwargs) -> dict | None:
+    users = get_list_or_404(User, is_superuser=False)
+    serializer = UserSerializer(users, many=True)
+    return serializer.data
 
 
 @try_except_decorator
-def add_group(request) -> dict | None:
+def add_group(request, *args, **kwargs) -> dict | None:
     result = deserialize_data(request, serialized_class=GroupSerializer)
     response = {
         "message": "Group registered successfully",
@@ -90,32 +96,28 @@ def add_group(request) -> dict | None:
 
 
 @try_except_decorator
-def get_all_groups(request) -> dict | None:
+def get_all_groups(request, *args, **kwargs) -> dict | None:
     group = get_all_objects(model=Group)
-    result = serialize_data(model=group, serialized_class=GroupSerializer, many=True)
-    return result
+    serializer = GroupSerializer(group, many=True)
+    return serializer.data
 
 
 @try_except_decorator
-def get_group_by_id(request, field) -> dict | None:
-    group = get_objects_by_field(model=Group, field="pk", value=field).first()
-    result = serialize_data(model=group, serialized_class=GroupSerializer)
-    return result
+def get_group_by_id(request, *args, **kwargs) -> dict | None:
+    group = get_object_or_404(Group, *args, **kwargs)
+    serializer = GroupSerializer(group)
+    return serializer.data
 
 
 @try_except_decorator
 def update_group(request, pk) -> dict | None:
-    group = get_objects_by_field(model=Group, field="pk", value=pk).first()
-    if not group:
-        return {"message": "Group not found"}
-    result = deserialize_data(request, serialized_class=GroupSerializer, partial=True)
+    group = get_object_or_404(Group, pk=pk)
+    result = deserialize_data(request, model=group, serialized_class=GroupSerializer, partial=True)
     return result
 
 
 @try_except_decorator
 def delete_group(request, pk) -> dict | None:
-    group = get_objects_by_field(model=Group, field="pk", value=pk).first()
-    if not group:
-        return {"message": "Group not found"}
+    group = get_object_or_404(Group, pk=pk)
     group.delete()
     return {"message": "Group was successfully deleted"}

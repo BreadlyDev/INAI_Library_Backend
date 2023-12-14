@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register, login, logout, get_users, create_group, change_group
+from .views import register, login, logout, get_users, create_group, crud_group
 
 urlpatterns = [
     path("register", register),
@@ -7,5 +7,5 @@ urlpatterns = [
     path("logout", logout),
     path("users/list", get_users),
     path("group/create", create_group),
-    path("group/<int:pk>", change_group),
+    path("group/<int:pk>", crud_group),
 ]

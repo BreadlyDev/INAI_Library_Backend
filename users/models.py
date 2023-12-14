@@ -96,10 +96,7 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         if self.role not in ROLES[1]:
             self.group = None
-
         if self.phone:
             validate_phone(str(self.phone))
-
         set_password_exist(self=self, password=self.password)
-
         super().save(*args, **kwargs)

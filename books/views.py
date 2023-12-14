@@ -1,30 +1,30 @@
 from rest_framework.decorators import api_view
-from .services import (get_all_books, get_book_by_id, get_books_by_cat,
-                       create_book, update_book, delete_book)
+from .services import (get__all__books, get__book, create__book,
+                       update__book, delete__book, get_e_book_file)
 from users.views import base_view
 
 
 @api_view(["GET"])
-def get_books(request):
-    return base_view(request, get_all_books)
+def get_list_books(request, *args, **kwargs):
+    return base_view(request, get__all__books, *args, **kwargs)
 
 
 @api_view(["GET"])
-def get_book_by_pk(request, pk: int):
-    return base_view(request, get_book_by_id, pk)
+def download_e_book(request, pk: int):
+    return get_e_book_file(request, pk=pk)
 
 
-@api_view(["GET"])
-def get_book_by_pk(request, category: str):
-    return base_view(request, get_book_by_id, category)
+@api_view(["POST"])
+def create_book(request):
+    return base_view(request, create__book)
 
 
 @api_view(["GET", "PUT", "DELETE"])
-def change_book(request, pk: int):
+def crud_book(request, pk: int):
     match request.method:
         case "GET":
-            return base_view(request, get_book_by_id, field=pk)
+            return base_view(request, get__book, pk=pk)
         case "PUT":
-            return base_view(request, update_book, field=pk)
+            return base_view(request, update__book, pk=pk)
         case "DELETE":
-            return base_view(request, delete_book, field=pk)
+            return base_view(request, delete__book, pk=pk)
