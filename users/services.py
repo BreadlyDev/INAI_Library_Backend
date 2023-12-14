@@ -31,16 +31,12 @@ def create_token(user: User) -> dict | None:
 
 @try_except_decorator
 def create_user(request) -> dict | None:
-    # data, user = deserialize_data(request, UserSerializer, return_model=True)
-    serializer = UserSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    user = serializer.save()
-    group = serializer.validated_data["group"].title
-    serializer.validated_data["group"] = group
+    result, user = deserialize_data(request, UserSerializer, return_model=True)
+    result["group"] = result["group"].title
     tokens = create_token(user)
     response = {
         "message": "User registered successfully",
-        **serializer.validated_data,
+        **result,
         **tokens
     }
     return response
@@ -51,7 +47,7 @@ def enter_system(request) -> dict | None:
     data = request.data
     email, password = get_request_field_values(data, ["email", "password"])
     user = get_objects_by_field(model=User, field="email", value=email).first()
-    user_data = LoginSerializer(user)
+    result = serialize_data(user, LoginSerializer)
     invalid = check_user_and_password(user, password)
     if invalid:
         return invalid
@@ -59,7 +55,7 @@ def enter_system(request) -> dict | None:
     response = {
         "message": "User logged in successfully",
         **tokens,
-        **user_data.data
+        **result
     }
     return response
 
@@ -72,27 +68,23 @@ def quit_system(request) -> dict | None:
     if invalid:
         return invalid
     RefreshToken(*refresh_token).blacklist()
-    response = {
-        "message": "User logged out successfully "
-    }
+    response = {"message": "User logged out successfully "}
     return response
 
 
 @try_except_decorator
 def get_all_users(request) -> dict | None:
     users = get_objects_by_field(model=User, field="is_superuser", value=False)
-    serializer = UserSerializer(users, many=True)
-    return serializer.data
+    result = serialize_data(model=users, serialized_class=UserSerializer, many=True)
+    return result
 
 
 @try_except_decorator
 def add_group(request) -> dict | None:
-    serializer = GroupSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
+    result = deserialize_data(request, serialized_class=GroupSerializer)
     response = {
         "message": "Group registered successfully",
-        **serializer.validated_data,
+        **result,
     }
     return response
 
@@ -100,15 +92,15 @@ def add_group(request) -> dict | None:
 @try_except_decorator
 def get_all_groups(request) -> dict | None:
     group = get_all_objects(model=Group)
-    serializer = GroupSerializer(group, many=True)
-    return serializer.data
+    result = serialize_data(model=group, serialized_class=GroupSerializer, many=True)
+    return result
 
 
 @try_except_decorator
 def get_group_by_id(request, field) -> dict | None:
     group = get_objects_by_field(model=Group, field="pk", value=field).first()
-    serializer = GroupSerializer(group)
-    return serializer.data
+    result = serialize_data(model=group, serialized_class=GroupSerializer, partial=True)
+    return result
 
 
 @try_except_decorator
@@ -116,11 +108,8 @@ def update_group(request, pk) -> dict | None:
     group = get_objects_by_field(model=Group, field="pk", value=pk).first()
     if not group:
         return {"message": "Group not found"}
-
-    serializer = GroupSerializer(group, data=request.data, partial=True)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    return serializer.data
+    result = deserialize_data(request, GroupSerializer, group)
+    return result
 
 
 @try_except_decorator

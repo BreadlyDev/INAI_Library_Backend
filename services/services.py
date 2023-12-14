@@ -19,18 +19,18 @@ def get_request_field_values(data: dict, fields: list[str]) -> list | dict:
     return values
 
 
-def serialize_data(model, serializer, many=False):
-    result = serializer.__init__(model, many=many)
-    return result.data
+def serialize_data(model, serialized_class, many=False, partial=False):
+    serializer = serialized_class(instance=model, many=many, partial=partial)
+    return serializer.data
 
 
-def deserialize_data(request, serializer, raise_exception=True, return_model=False):
-    result = serializer.__init__(serializer, instance=None, data=request.data)
-    result.is_valid(raise_exception=raise_exception)
-    model = result.save()
+def deserialize_data(request, serialized_class, raise_exception=True, return_model=False):
+    serializer = serialized_class(data=request.data)
+    serializer.is_valid(raise_exception=raise_exception)
+    model = serializer.save()
     if return_model:
-        return result, model
-    return result
+        return serializer.validated_data, model
+    return serializer.validated_data
 
 
 def try_except_decorator(func):
