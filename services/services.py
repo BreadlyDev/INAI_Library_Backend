@@ -19,13 +19,14 @@ def get_request_field_values(data: dict, fields: list[str]) -> list | dict:
     return values
 
 
-def serialize_data(model, serialized_class, many=False, partial=False):
-    serializer = serialized_class(instance=model, many=many, partial=partial)
+def serialize_data(model, serialized_class, many=False):
+    serializer = serialized_class(instance=model, many=many)
     return serializer.data
 
 
-def deserialize_data(request, serialized_class, raise_exception=True, return_model=False):
-    serializer = serialized_class(data=request.data)
+def deserialize_data(request, serialized_class, raise_exception=True, model=None,
+                     partial=False, return_model=False):
+    serializer = serialized_class(data=request.data, model=model, partial=partial)
     serializer.is_valid(raise_exception=raise_exception)
     model = serializer.save()
     if return_model:

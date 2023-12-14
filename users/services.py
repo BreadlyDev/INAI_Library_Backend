@@ -99,7 +99,7 @@ def get_all_groups(request) -> dict | None:
 @try_except_decorator
 def get_group_by_id(request, field) -> dict | None:
     group = get_objects_by_field(model=Group, field="pk", value=field).first()
-    result = serialize_data(model=group, serialized_class=GroupSerializer, partial=True)
+    result = serialize_data(model=group, serialized_class=GroupSerializer)
     return result
 
 
@@ -108,7 +108,7 @@ def update_group(request, pk) -> dict | None:
     group = get_objects_by_field(model=Group, field="pk", value=pk).first()
     if not group:
         return {"message": "Group not found"}
-    result = deserialize_data(request, GroupSerializer, group)
+    result = deserialize_data(request, serialized_class=GroupSerializer, partial=True)
     return result
 
 
