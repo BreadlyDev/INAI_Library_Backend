@@ -5,7 +5,7 @@ urlpatterns = [
     path("register", register),
     path("login", login),
     path("logout", logout),
-    path("users/list", get_users),
+    path("users/all", get_users),
     path("group/create", create_group),
     path("group/<int:pk>", crud_group),
 ]
