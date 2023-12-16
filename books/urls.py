@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
-import books.views as views
+from . import views
 
 urlpatterns = [
     path("book/all", views.get_all_books),
