@@ -53,11 +53,11 @@ class Book(models.Model):
     edition_year = models.CharField(max_length=4)
     purchase_price = models.CharField(max_length=10)
     purchase_time = models.DateField()
-    quantity = models.IntegerField()
+    quantity = models.PositiveIntegerField()
     isPossibleToOrder = models.BooleanField(default=True)
     rating = models.FloatField(default=0)
     orders = models.IntegerField(default=0)
-    reviews_quantity = models.IntegerField(default=0)
+    reviews_quantity = models.PositiveIntegerField(default=0)
     absolute_rating = models.IntegerField(default=0)
     created_time = models.DateTimeField(auto_now_add=True)
 
