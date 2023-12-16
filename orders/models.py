@@ -1,3 +1,26 @@
 from django.db import models
+from users.models import User
+from books.models import Book
 
-# Create your models here.
+ORDER_STATUS = (
+    ("Ожидает проверки", "Ожидает проверки"),
+    ("В обработке", "В обработке"),
+    ("Выполнен", "Выполнен"),
+    ("Отклонено", "Отклонено"),
+)
+
+
+class Order(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    books = models.ManyToManyField(Book)
+    status = models.CharField(max_length=50, choices=ORDER_STATUS, default=ORDER_STATUS[0][0])
+    comment = models.TextField(default="", blank=True)
+    created_time = models.DateTimeField(auto_now_add=True)
+    due_time = models.DateTimeField(null=True)
+
+    class Meta:
+        ordering = ["-created_time"]
+        db_table = "orders"
+
+    def __str__(self):
+        return f"Order by {self.owner} at {self.created_time}"

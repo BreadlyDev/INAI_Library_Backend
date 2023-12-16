@@ -72,7 +72,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15, null=True)
     role = models.CharField(max_length=150, choices=ROLES, default=ROLES[1][1])
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True, unique=False)
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, unique=False)
 
     username = None
     date_joined = None

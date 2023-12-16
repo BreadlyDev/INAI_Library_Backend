@@ -43,7 +43,7 @@ class Subcategory(models.Model):
 class Book(models.Model):
     author = models.CharField(max_length=150)
     title = models.CharField(max_length=150)
-    description = models.TextField(default="Отсутствует описание", blank=True)
+    description = models.TextField(default="No description", blank=True)
     image = models.ImageField(default=ERROR_404_IMAGE, upload_to=IMAGE_FOLDER)
     e_book = models.FileField(upload_to=E_BOOKS_FOLDER)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

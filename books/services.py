@@ -43,7 +43,6 @@ def get_e_book_file(request, pk):
     path = file.e_book.path
     response = FileResponse(open(path, 'rb'))
     response["Content-Disposition"] = f"attachment; filename = {file.e_book.name}"
-    response["Content-Type"] = "application/msword"
     return response
 
 
