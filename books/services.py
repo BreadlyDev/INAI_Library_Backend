@@ -1,6 +1,6 @@
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, get_list_or_404
-
+from django.db.models import Q
 from .models import Book, Subcategory, Category
 from .serializers import BookSerializer, CategorySerializer, SubcategorySerializer
 from services.services import deserialize_data
@@ -31,9 +31,25 @@ def get__book(request, pk):
 
 def get__all__books(request):
     books = get_list_or_404(Book)
+
     category = request.GET.get("category")
+    less_orders = request.GET.get("less_orders")
+    more_orders = request.GET.get("more_orders")
+    author = request.GET.get("author")
+    title = request.GET.get("title")
+
     if category:
         books = Book.objects.filter(category__title=category.capitalize())
+    if less_orders:
+        books = Book.objects.filter(orders__lte=less_orders)
+    if more_orders:
+        books = Book.objects.filter(orders__gte=more_orders)
+
+    if author:
+        books = Book.objects.filter(Q(author__icontains=author))
+    elif title:
+        books = Book.objects.filter(Q(title__icontains=title))
+
     serializer = BookSerializer(books, many=True)
     return serializer.data
 

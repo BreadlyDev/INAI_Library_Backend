@@ -58,7 +58,7 @@ class Book(models.Model):
     rating = models.FloatField(default=0)
     orders = models.IntegerField(default=0)
     reviews_quantity = models.PositiveIntegerField(default=0)
-    absolute_rating = models.IntegerField(default=0)
+    total_rating = models.IntegerField(default=0)
     created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
