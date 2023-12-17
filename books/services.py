@@ -20,7 +20,7 @@ def update__book(request, pk):
 def delete__book(request, pk):
     book = get_object_or_404(Book, pk=pk)
     book.delete()
-    return {"message": "Book was successfully deleted"}
+    return {"message": f"Book with id {pk} was successfully deleted"}
 
 
 def get__book(request, pk):

@@ -120,4 +120,4 @@ def update_group(request, pk) -> dict | None:
 def delete_group(request, pk) -> dict | None:
     group = get_object_or_404(Group, pk=pk)
     group.delete()
-    return {"message": "Group was successfully deleted"}
+    return {"message": f"Group with id {pk} was successfully deleted"}

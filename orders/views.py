@@ -12,7 +12,6 @@ def get_all_orders(request):
         return Response({"message": "You are not authenticated"}, status.HTTP_403_FORBIDDEN)
     if not is_librarian(request.user):
         return base_view(request, get__own__orders)
-        # return Response({"message": "You don't have permission"}, status.HTTP_403_FORBIDDEN)
     return base_view(request, get__all__orders)
 
 

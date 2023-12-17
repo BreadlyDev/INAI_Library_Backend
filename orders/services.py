@@ -12,8 +12,8 @@ from .models import Order
 def create__order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    serializer.validated_data["owner"] = request.user
-    serializer.save()
+    # serializer.validated_data["owner"] = request.user
+    serializer.save(owner=request.user)
     # result = deserialize_data(request, serialized_class=OrderSerializer, owner=request.user)
     return serializer.data
 
@@ -27,7 +27,7 @@ def update__order(request, pk):
 def delete__order(request, pk):
     order = get_object_or_404(Order, pk=pk)
     order.delete()
-    return {"message": "Order was successfully deleted"}
+    return {"message": f"Order with id {pk} was successfully deleted"}
 
 
 def get__order(request, pk):
