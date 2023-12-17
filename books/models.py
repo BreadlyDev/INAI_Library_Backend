@@ -55,7 +55,7 @@ class Book(models.Model):
     purchase_time = models.DateField()
     quantity = models.PositiveIntegerField()
     isPossibleToOrder = models.BooleanField(default=True)
-    rating = models.FloatField(default=0)
+    rating = models.FloatField(default=0.0)
     orders = models.IntegerField(default=0)
     reviews_quantity = models.PositiveIntegerField(default=0)
     total_rating = models.IntegerField(default=0)

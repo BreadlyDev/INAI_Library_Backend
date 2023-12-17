@@ -8,8 +8,8 @@ from .services import (get__all__reviews, get__review, create__review,
 
 
 @api_view(["GET"])
-def get_all_reviews(request):
-    return base_view(request, get__all__reviews)
+def get_all_reviews(request, book_id: int):
+    return base_view(request, get__all__reviews, book_id=book_id)
 
 
 @api_view(["POST"])

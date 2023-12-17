@@ -1,17 +1,18 @@
 from django.shortcuts import get_object_or_404, get_list_or_404
 from .models import Review
 from .serializers import ReviewSerializer
-from services.services import deserialize_data
+from services.services import deserialize_data, try_except_decorator
 
 
 def create__review(request):
-    result = deserialize_data(request, serialized_class=ReviewSerializer)
-    # book = result["book"]
+    serializer = ReviewSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save(author=request.user)
+
     return {
         "message": "Your review was successfully created",
-        **result
+        **serializer.data
     }
-    # return result
 
 
 def update__review(request, pk):
@@ -40,7 +41,7 @@ def get__review(request, pk):
     return serializer.data
 
 
-def get__all__reviews(request):
-    reviews = get_list_or_404(Review)
+def get__all__reviews(request, book_id: int):
+    reviews = Review.objects.filter(book_id=book_id)
     serializer = ReviewSerializer(reviews, many=True)
     return serializer.data

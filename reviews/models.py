@@ -27,7 +27,8 @@ class Review(models.Model):
         self.book.reviews_quantity += 1
 
         if self.book.reviews_quantity > 0:
-            self.book.rating = round(self.book.total_rating / self.book.reviews_quantity)
+            self.book.rating = round(float(self.book.total_rating)
+                                / float(self.book.reviews_quantity), 2)
         else:
             self.book.rating = 0
 
