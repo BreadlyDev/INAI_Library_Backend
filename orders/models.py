@@ -12,9 +12,9 @@ ORDER_STATUS = (
 
 
 class OrderBook(models.Model):
-    order = models.ForeignKey("Order", on_delete=models.SET_NULL, null=True)
-    book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True)
-    quantity = models.PositiveIntegerField()
+    order = models.ForeignKey("Order", on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
 
     class Meta:
         db_table = "orders_books"

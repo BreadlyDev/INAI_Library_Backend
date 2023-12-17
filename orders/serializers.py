@@ -3,6 +3,8 @@ from .models import Order, OrderBook
 
 
 class OrderBookSerializer(serializers.ModelSerializer):
+    order = serializers.ReadOnlyField()
+
     class Meta:
         model = OrderBook
         fields = "__all__"
@@ -10,7 +12,7 @@ class OrderBookSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField()
-    books = OrderBookSerializer(many=True, read_only=True)
+    books = OrderBookSerializer(many=True)
 
     class Meta:
         model = Order
@@ -18,6 +20,15 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_owner_email(self, instance):
         return instance.owner.email if instance.owner else None
+
+    def create(self, validated_data):
+        books_data = validated_data.pop("books")
+        order = Order.objects.create(**validated_data)
+
+        for book_data in books_data:
+            OrderBook.objects.create(order=order, **book_data)
+
+        return order
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

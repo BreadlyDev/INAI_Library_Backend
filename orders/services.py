@@ -1,12 +1,21 @@
 from django.shortcuts import get_object_or_404, get_list_or_404
-from services.services import deserialize_data
+from services.services import deserialize_data, try_except_decorator
 from .serializers import OrderSerializer, LibrarianOrderSerializer
 from .models import Order
 
 
+# def create__order(request):
+#     result = deserialize_data(request, serialized_class=OrderSerializer, owner=request.user)
+#     return result
+
+@try_except_decorator
 def create__order(request):
-    result = deserialize_data(request, serialized_class=OrderSerializer)
-    return result
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.validated_data["owner"] = request.user
+    serializer.save()
+    # result = deserialize_data(request, serialized_class=OrderSerializer, owner=request.user)
+    return serializer.data
 
 
 def update__order(request, pk):
