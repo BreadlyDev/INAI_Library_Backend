@@ -18,13 +18,16 @@ class Review(models.Model):
         db_table = "reviews"
 
     def save(self, *args, **kwargs):
+        if self.id:
+            return
+
         super(Review, self).save(*args, **kwargs)
 
-        total_rating = self.book.total_rating + self.grade
-        reviews_quantity = self.book.reviews_quantity + 1
+        self.book.total_rating += self.grade
+        self.book.reviews_quantity += 1
 
-        if reviews_quantity > 0:
-            self.book.rating = round(total_rating / reviews_quantity)
+        if self.book.reviews_quantity > 0:
+            self.book.rating = round(self.book.total_rating / self.book.reviews_quantity)
         else:
             self.book.rating = 0
 
