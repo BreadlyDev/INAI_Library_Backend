@@ -32,13 +32,14 @@ def create_token(user) -> dict | None:
 
 @try_except_decorator
 def create_user(request, *args, **kwargs) -> dict | None:
-    result, user = deserialize_data(request, UserSerializer, return_model=True)
-    result["group"] = result["group"].title
+    serializer = UserSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
     tokens = create_token(user)
 
     response = {
         "message": "User registered successfully",
-        **result,
+        **serializer.data,
         **tokens
     }
 

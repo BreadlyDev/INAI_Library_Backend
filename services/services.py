@@ -22,9 +22,9 @@ def deserialize_data(request, serialized_class, raise_exception=True, model=None
                      partial=False, return_model=False):
     serializer = serialized_class(data=request.data, model=model, partial=partial)
     serializer.is_valid(raise_exception=raise_exception)
-    model = serializer.save()
+    model_ = serializer.save()
     if return_model:
-        return serializer.validated_data, model
+        return serializer.validated_data, model_
     return serializer.validated_data
 
 
