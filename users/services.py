@@ -97,7 +97,7 @@ def add_group(request, *args, **kwargs) -> dict | None:
 
 @try_except_decorator
 def get__all__groups(request, *args, **kwargs) -> dict | None:
-    group = get_all_objects(model=Group)
+    group = get_list_or_404(Group)
     serializer = GroupSerializer(group, many=True)
     return serializer.data
 
