@@ -7,7 +7,7 @@ urlpatterns = [
     path("login", login),
     path("logout", logout),
     path("users/all", get_users),
-    path("groups/all", get_all_groups),
+    path("group/all", get_all_groups),
     path("group/create", create_group),
     path("group/<int:pk>", crud_group),
     path('activate/refresh/token', TokenRefreshView.as_view()),
