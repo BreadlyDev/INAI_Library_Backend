@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from .services import (create_user, enter_system, quit_system,
-                       get_all_users, add_group, get_group_by_id, update_group, delete_group)
+                       get_all_users, add_group, get_group_by_id,
+                       update_group, delete_group, get__all__groups)
 from services.services import base_view
 
 
@@ -22,6 +23,11 @@ def logout(request):
 @api_view(["GET"])
 def get_users(request):
     return base_view(request, get_all_users)
+
+
+@api_view(["GET"])
+def get_all_groups(request):
+    return base_view(request, get__all__groups)
 
 
 @api_view(["POST"])
