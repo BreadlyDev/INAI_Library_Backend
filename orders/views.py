@@ -20,7 +20,7 @@ def create_order(request):
     if not is_authenticated(request.user):
         return Response({"message": "You are not authenticated"}, status.HTTP_403_FORBIDDEN)
     if is_librarian(request.user):
-        return Response({"message": "You can't make orders"}, status.HTTP_403_FORBIDDEN)
+        return Response({"message": "You aren't allowed to make orders"}, status.HTTP_403_FORBIDDEN)
     return base_view(request, create__order)
 
 

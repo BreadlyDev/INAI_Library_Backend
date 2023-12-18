@@ -1,24 +1,37 @@
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.db.models import Q
+from django.core.files.storage import default_storage
 from .models import Book, Subcategory, Category
 from .serializers import BookSerializer, CategorySerializer, SubcategorySerializer
 from services.services import deserialize_data
+from main.settings import ERROR_404_IMAGE
 
 
 def create__book(request):
     result = deserialize_data(request, serialized_class=BookSerializer)
-    return result
+    return {
+        "message": "Book was successfully added",
+        **result
+    }
 
 
 def update__book(request, pk):
     book = get_object_or_404(Book, pk=pk)
+    if book.image != request.data["image"] \
+            and book.image.path != ERROR_404_IMAGE:
+        default_storage.delete(book.image.path)
     result = deserialize_data(request, model=book, serialized_class=BookSerializer, partial=True)
-    return result
+    return {
+        "message": f"Book with id {pk} was successfully updated",
+        **result
+    }
 
 
 def delete__book(request, pk):
     book = get_object_or_404(Book, pk=pk)
+    if book.image and book.image.path != ERROR_404_IMAGE:
+        default_storage.delete(book.image.path)
     book.delete()
     return {"message": f"Book with id {pk} was successfully deleted"}
 
@@ -26,6 +39,14 @@ def delete__book(request, pk):
 def get__book(request, pk):
     book = get_object_or_404(Book, pk=pk)
     serializer = BookSerializer(book)
+
+    image_path = book.image.name
+    if default_storage.exists(image_path):
+        default_storage.url(image_path)
+    else:
+        book.image = ERROR_404_IMAGE
+        book.save()
+
     return serializer.data
 
 
@@ -64,20 +85,26 @@ def get_e_book_file(request, pk):
 
 def create__category(request):
     result = deserialize_data(request, serialized_class=CategorySerializer)
-    return result
+    return {
+        "message": "Category was successfully added",
+        **result
+    }
 
 
 def update__category(request, pk):
     category = get_object_or_404(Category, pk=pk)
     result = deserialize_data(request, model=category,
                               serialized_class=CategorySerializer, partial=True)
-    return result
+    return {
+        "message": f"Book with id {pk} was successfully updated",
+        **result
+    }
 
 
 def delete__category(request, pk):
     category = get_object_or_404(Category, pk=pk)
     category.delete()
-    return {"message": "Category was successfully deleted"}
+    return {"message": f"Category with id {pk} was successfully deleted"}
 
 
 def get__category(request, pk):
@@ -94,14 +121,20 @@ def get__all__categories(request):
 
 def create__subcategory(request):
     result = deserialize_data(request, serialized_class=SubcategorySerializer)
-    return result
+    return {
+        "message": "Subcategory was successfully added",
+        **result
+    }
 
 
 def update__subcategory(request, pk):
     subcategory = get_object_or_404(Subcategory, pk=pk)
     result = deserialize_data(request, model=subcategory,
                               serialized_class=SubcategorySerializer, partial=True)
-    return result
+    return {
+        "message": f"Subcategory with id {pk} was successfully updated",
+        **result
+    }
 
 
 def delete__subcategory(request, pk):

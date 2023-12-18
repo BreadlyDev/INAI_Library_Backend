@@ -12,9 +12,7 @@ from .models import Order
 def create__order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    # serializer.validated_data["owner"] = request.user
     serializer.save(owner=request.user)
-    # result = deserialize_data(request, serialized_class=OrderSerializer, owner=request.user)
     return serializer.data
 
 
