@@ -33,7 +33,7 @@ def create_book(request):
 def crud_book(request, pk: int):
     if request.method != "GET":
         if not is_librarian(request.user):
-            return Response({"message": "You aren't allowed to change and delete book"},
+            return Response({"message": "You aren't allowed to change and delete books"},
                             status.HTTP_403_FORBIDDEN)
     match request.method:
         case "GET":
@@ -61,7 +61,7 @@ def create_category(request):
 def crud_category(request, pk: int):
     if request.method != "GET":
         if not is_librarian(request.user):
-            return Response({"message": "You aren't allowed to change and delete category"},
+            return Response({"message": "You aren't allowed to change and delete categories"},
                             status.HTTP_403_FORBIDDEN)
     match request.method:
         case "GET":
@@ -89,7 +89,7 @@ def create_subcategory(request):
 def crud_subcategory(request, pk: int):
     if request.method != "GET":
         if not is_librarian(request.user):
-            return Response({"message": "You aren't allowed to change and delete subcategory"},
+            return Response({"message": "You aren't allowed to change and delete subcategories"},
                             status.HTTP_403_FORBIDDEN)
     match request.method:
         case "GET":

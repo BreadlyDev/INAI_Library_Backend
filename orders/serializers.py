@@ -1,11 +1,13 @@
 from rest_framework import serializers
-from .models import Order, OrderBook
+
 from books.models import Book
+from books.serializers import BookIdSerializer
+from .models import Order, OrderBook
 
 
 class OrderBookSerializer(serializers.ModelSerializer):
     order = serializers.ReadOnlyField()
-    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
+    book = BookIdSerializer()
 
     class Meta:
         model = OrderBook

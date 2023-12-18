@@ -26,10 +26,21 @@ SECRET_KEY = 'django-insecure-p7psjtj#*^ln4toh(sdx+wdh8_wtukp0=o)sc2*ail-htfw2o6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "orenvadi.pythonanywhere.com",
+    "192.168.45.234",
+    "127.0.0.1",
+    "192.168.108.191",
+    "localhost",
+    "192.168.108.234",
+    "192.168.88.71",
+]
 
-
-# Application definition
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://inai-library.netlify.app",
+    "https://libr2.vercel.app",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -38,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework_simplejwt.token_blacklist",
     "rest_framework",
     "users",
     "books",

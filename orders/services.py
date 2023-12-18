@@ -4,10 +4,6 @@ from .serializers import OrderSerializer, LibrarianOrderSerializer
 from .models import Order
 
 
-# def create__order(request):
-#     result = deserialize_data(request, serialized_class=OrderSerializer, owner=request.user)
-#     return result
-
 @try_except_decorator
 def create__order(request):
     serializer = OrderSerializer(data=request.data)
